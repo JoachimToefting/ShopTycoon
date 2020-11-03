@@ -1,0 +1,22 @@
+﻿@inject ProtectedLocalStorage ProtectedLocalStorage
+@inject NavigationManager NavigationManager
+
+<h3>NewGame</h3>
+
+<label>Whats your name:</label>
+
+<input @bind="Name" />
+<button class="btn btn-primary" @onclick="Save">New Game</button>
+
+@code {
+	[Parameter]
+	public string Name { get; set; }
+
+	[Parameter]
+	public EventCallback<string> NameChanged { get; set; }
+
+	public async Task Save()
+	{
+		await ProtectedLocalStorage.SetAsync("Name", Name);
+	}
+}

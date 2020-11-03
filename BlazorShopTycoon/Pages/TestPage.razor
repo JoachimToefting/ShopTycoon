@@ -1,0 +1,15 @@
+﻿@page "/TestPage"
+
+@inject ProtectedLocalStorage ProtectedLocalStorage
+
+<h3>TestPage</h3>
+<input @bind="Name"/>
+<button @onclick="getname">nice name bro</button>
+
+@code {
+	public string Name { get; set; }
+	private async Task getname()
+	{
+		Name = await ProtectedLocalStorage.GetAsync<string>("Name");
+	}
+}

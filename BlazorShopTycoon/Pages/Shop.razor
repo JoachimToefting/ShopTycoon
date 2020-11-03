@@ -1,0 +1,28 @@
+﻿@page "/shop"
+
+@inject ProtectedLocalStorage ProtectedLocalStorage
+
+<h3>Shop</h3>
+
+<h4>Welcome to your shop</h4>
+
+@if (string.IsNullOrEmpty(Name))
+{
+	<BlazorShopTycoon.Components.NewGame @bind-Name="Name"></BlazorShopTycoon.Components.NewGame>
+	<br />
+	<button class="btn btn-primary" @onclick="Load">Load last game</button>
+}
+else
+{
+	<BlazorShopTycoon.Components.Game></BlazorShopTycoon.Components.Game>
+}
+
+@code {
+	public string Name { get; set; }
+
+	private async Task Load()
+	{
+		string NameLocalStorage = await ProtectedLocalStorage.GetAsync<string>("Name");
+		Name = NameLocalStorage;
+	}
+}

@@ -29,6 +29,7 @@ namespace BlazorShopTycoon
 			services.AddRazorPages();
 			services.AddServerSideBlazor();
 			services.AddProtectedBrowserStorage();
+			services.AddScoped<ShopStoreService>();
 			services.AddSingleton<WeatherForecastService>();
 		}
 

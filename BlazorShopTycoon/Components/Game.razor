@@ -1,7 +1,35 @@
-﻿<h3>What do you want in your store today</h3>
+﻿@inject ShopStoreService Shopservice
 
+<NewShelfitem></NewShelfitem>
+@foreach (var item in Shelfitems)
+{
+	<div class="row">
+		<div class="col-3">
+			<p>@item</p>
+		</div>
+		<div class="col-3">
 
+		</div>
+	</div>
+}
 
 @code {
 
+	private List<Shelfitem> Shelfitems { get; set; }
+	private List<Shopitem> Shopitems { get; set; }
+
+	private void GetShopItems()
+	{
+		Shopitems = Shopservice.Shopitems;
+	}
+	private void GetShelfitems()
+	{
+		Shelfitems = Shopservice.Shelfitems;
+	}
+	protected override Task OnInitializedAsync()
+	{
+		GetShopItems();
+		GetShelfitems();
+		return base.OnInitializedAsync();
+	}
 }

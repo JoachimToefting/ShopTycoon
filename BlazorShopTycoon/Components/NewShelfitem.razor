@@ -17,17 +17,40 @@
 		<label class="text-nowrap">Price:</label>
 		<input class="form-control" @bind="newShelfitem.Shelfprice" />
 	</div>
-	<button class="btn btn-primary" @onclick="addProduct">Add product</button>
+	
 </div>
 
 @code {
-	private Shelfitem newShelfitem { get; set; } = new Shelfitem();
+
 	private List<Shopitem> Shopitems { get; set; }
 
-	private void addProduct()
+	[Parameter]
+	public Shelfitem newShelfitem { get; set; }
+
+
+	[Parameter]
+	public EventCallback<Shelfitem> newShelfitemChanged { get; set; }
+
+	[Parameter]
+	public double yourMoney { get; set; }
+
+	[Parameter]
+	public EventCallback<double> yourMoneyChanged { get; set; }
+
+	public void addProduct()
 	{
-		Shopservice.NewShelfItem(newShelfitem);
-		newShelfitem = new Shelfitem();
+		
+		double newMoneySum = yourMoney - Shopitems.First(x => x.ID == newShelfitem.ShopitemID).Price * newShelfitem.Shelfcount;
+		if (newMoneySum >= 0)
+		{
+			Shopservice.NewShelfItem(newShelfitem);
+			yourMoney = newMoneySum;
+		}
+		else
+		{
+			//error
+		}
+
 	}
 	protected override Task OnInitializedAsync()
 	{

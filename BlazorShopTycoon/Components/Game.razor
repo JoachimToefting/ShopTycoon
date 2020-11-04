@@ -1,22 +1,84 @@
 ﻿@inject ShopStoreService Shopservice
 
-<NewShelfitem></NewShelfitem>
+<NewShelfitem @bind-yourMoney="YourMoney" @bind-newShelfitem="newShelfitem" @ref="newShelfitemComponent"></NewShelfitem>
+<button class="btn btn-primary" @onclick="addShelfitem">Add product</button>
 @foreach (var item in Shelfitems)
 {
 	<div class="row">
 		<div class="col-3">
-			<p>@item</p>
+			<p>@Shopitems[item.ShopitemID - 1].Name</p>
 		</div>
 		<div class="col-3">
-
+			<p>@item.Shelfprice</p>
+		</div>
+		<div class="col-3">
+			<p>@item.Shelfcount</p>
+		</div>
+		<div>
+			<button class="btn btn-danger" @onclick="(() => removeShelfitem(item.ShopitemID))">X</button>
 		</div>
 	</div>
 }
+<br />
+<input disabled @bind="YourMoney" />
+<button class="btn btn-danger">Next day</button>
 
 @code {
+	private Shelfitem newShelfitem { get; set; } = new Shelfitem();
 
-	private List<Shelfitem> Shelfitems { get; set; }
+	[Parameter]
+	public List<Shelfitem> Shelfitems { get; set; }
+
+	[Parameter]
+	public EventCallback<List<Shelfitem>> ShelfitemsChanged { get; set; }
+
 	private List<Shopitem> Shopitems { get; set; }
+
+	[Parameter]
+	public double YourMoney { get; set; }
+
+	[Parameter]
+	public EventCallback<double> YourMoneyChanged { get; set; }
+
+	private NewShelfitem newShelfitemComponent;
+
+	private void addShelfitem()
+	{
+		newShelfitemComponent.addProduct();
+		GetShelfitems();
+		newShelfitem = new Shelfitem();
+	}
+	private void removeShelfitem(int id)
+	{
+		Shopservice.DeleteShelfItem(id);
+	}
+
+	private void NextDay(WeatherBonus weather)
+	{
+		Random rng = new Random();
+
+		foreach (var item in Shelfitems)
+		{
+			var shopitem = Shopitems.FirstOrDefault(x => x.ID == item.ShopitemID);
+			//base sellmultiplier
+			double sellmultiplier = 0.70;
+
+			double overpriceratio = ((item.Shelfprice - shopitem.Price) / shopitem.Price);
+
+			sellmultiplier = Math.Min(sellmultiplier - overpriceratio, 0.05);
+
+			if (shopitem.weatherBonus == weather && weather != WeatherBonus.none)
+			{
+				sellmultiplier = sellmultiplier * 2;
+			}
+			sellmultiplier = Math.Max(sellmultiplier, 1);
+			int maxsold = (int)Math.Floor((double)item.Shelfcount * sellmultiplier);
+			int sold = rng.Next(0, maxsold);
+
+			Shopservice.SellShelfitem(item.ShopitemID, sold);
+			YourMoney = YourMoney + sold * item.Shelfprice;
+		}
+	}
 
 	private void GetShopItems()
 	{

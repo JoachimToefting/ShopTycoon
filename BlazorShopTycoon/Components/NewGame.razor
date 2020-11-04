@@ -18,5 +18,9 @@
 	public async Task Save()
 	{
 		await ProtectedLocalStorage.SetAsync("Name", Name);
+		await ProtectedLocalStorage.SetAsync("GameData", new GameData
+		{
+			YourMoney = 300
+		});
 	}
 }

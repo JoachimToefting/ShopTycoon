@@ -25,13 +25,30 @@ namespace BlazorShopTycoon.Data
 				}
 				else
 				{
-					//ikke samme pris
+					//not same price and will not be added
 				}
 			}
 			else
 			{
-				Shelfitems.Add(shelfitem);
+				if (shelfitem.ShopitemID <= Shopitems.Count() && shelfitem.ShopitemID > 0)
+				{
+					Shelfitems.Add(shelfitem);
+				}
+				else
+				{
+					//no shopitem
+				}
 			}
+		}
+		public void DeleteShelfItem(int id)
+		{
+			Shelfitems.Remove(Shelfitems.FirstOrDefault(x => x.ShopitemID == id));
+		}
+		public void SellShelfitem(int id, int count)
+		{
+			var item = Shelfitems.FirstOrDefault(x => x.ShopitemID == id);
+
+			item.Shelfcount = item.Shelfcount - count;
 		}
 	}
 }

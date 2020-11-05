@@ -1,6 +1,11 @@
 ﻿@inject ShopStoreService Shopservice
 
-<NewShelfitem @bind-yourMoney="YourMoney" @bind-newShelfitem="newShelfitem" @ref="newShelfitemComponent"></NewShelfitem>
+@if (!String.IsNullOrEmpty(ErrorText))
+{
+	<span class="bg-danger">@ErrorText</span>
+}
+
+<NewShelfitem @bind-newShelfitem="newShelfitem" @ref="newShelfitemComponent"></NewShelfitem>
 <button class="btn btn-primary" @onclick="addShelfitem">Add product</button>
 @foreach (var item in Shelfitems)
 {
@@ -21,9 +26,11 @@
 }
 <br />
 <input disabled @bind="YourMoney" />
-<button class="btn btn-danger">Next day</button>
+<button class="btn btn-danger" @onclick="(()=> NextDay(WeatherBonus.sunshine))">Next day</button>
 
 @code {
+	private string ErrorText { get; set; }
+
 	private Shelfitem newShelfitem { get; set; } = new Shelfitem();
 
 	[Parameter]
@@ -44,9 +51,18 @@
 
 	private void addShelfitem()
 	{
-		newShelfitemComponent.addProduct();
-		GetShelfitems();
-		newShelfitem = new Shelfitem();
+		if (newShelfitem.ShopitemID>0)
+		{
+			double newMoneySum = YourMoney - Shopitems.First(x => x.ID == newShelfitem.ShopitemID).Price * newShelfitem.Shelfcount;
+			if (newMoneySum >= 0)
+			{
+				newShelfitemComponent.addProduct();
+				YourMoney = newMoneySum;
+				GetShelfitems();
+				newShelfitem = new Shelfitem();
+			}
+		}
+
 	}
 	private void removeShelfitem(int id)
 	{
@@ -60,7 +76,6 @@
 		foreach (var item in Shelfitems)
 		{
 			var shopitem = Shopitems.FirstOrDefault(x => x.ID == item.ShopitemID);
-			//base sellmultiplier
 			double sellmultiplier = 0.70;
 
 			double overpriceratio = ((item.Shelfprice - shopitem.Price) / shopitem.Price);
@@ -75,11 +90,14 @@
 			int maxsold = (int)Math.Floor((double)item.Shelfcount * sellmultiplier);
 			int sold = rng.Next(0, maxsold);
 
-			Shopservice.SellShelfitem(item.ShopitemID, sold);
+			Shopservice.SellShelfitem(item.ShopitemID, item.Shelfprice, sold);
 			YourMoney = YourMoney + sold * item.Shelfprice;
 		}
 	}
-
+	private void GetError()
+	{
+		ErrorText = Shopservice.ErrorText;
+	}
 	private void GetShopItems()
 	{
 		Shopitems = Shopservice.Shopitems;
@@ -92,6 +110,7 @@
 	{
 		GetShopItems();
 		GetShelfitems();
+		GetError();
 		return base.OnInitializedAsync();
 	}
 }

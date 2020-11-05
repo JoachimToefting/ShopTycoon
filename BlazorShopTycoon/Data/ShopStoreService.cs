@@ -8,6 +8,7 @@ namespace BlazorShopTycoon.Data
 {
 	public class ShopStoreService
 	{
+		public string ErrorText { get; set; }
 		public List<Shopitem> Shopitems { get; set; }
 		public ShopStoreService()
 		{
@@ -25,7 +26,7 @@ namespace BlazorShopTycoon.Data
 				}
 				else
 				{
-					//not same price and will not be added
+					Shelfitems.Add(shelfitem);
 				}
 			}
 			else
@@ -36,7 +37,7 @@ namespace BlazorShopTycoon.Data
 				}
 				else
 				{
-					//no shopitem
+					ErrorText = "No shopitem";
 				}
 			}
 		}
@@ -44,9 +45,9 @@ namespace BlazorShopTycoon.Data
 		{
 			Shelfitems.Remove(Shelfitems.FirstOrDefault(x => x.ShopitemID == id));
 		}
-		public void SellShelfitem(int id, int count)
+		public void SellShelfitem(int id,double price, int count)
 		{
-			var item = Shelfitems.FirstOrDefault(x => x.ShopitemID == id);
+			var item = Shelfitems.FirstOrDefault(x => x.ShopitemID == id && x.Shelfprice == price);
 
 			item.Shelfcount = item.Shelfcount - count;
 		}

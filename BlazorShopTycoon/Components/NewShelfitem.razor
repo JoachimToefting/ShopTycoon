@@ -2,7 +2,7 @@
 
 <h3>What do you want in your store today</h3>
 
-<div class="w-50">
+@*<div class="w-50">
 	<select class="custom-select" @bind="newShelfitem.ShopitemID">
 		@foreach (var item in Shopitems)
 		{
@@ -11,50 +11,63 @@
 	</select>
 	<div class="d-flex">
 		<label class="text-nowrap">Amount to shelf:</label>
-		<input class="form-control" @bind="newShelfitem.Shelfcount" />
+		<input type="number" class="form-control" @bind="newShelfitem.Shelfcount" />
 	</div>
 	<div class="d-flex">
 		<label class="text-nowrap">Price:</label>
-		<input class="form-control" @bind="newShelfitem.Shelfprice" />
+		<input type="number" class="form-control" @bind="newShelfitem.Shelfprice" />
 	</div>
-	
-</div>
+</div>*@
+<EditForm Model="@newShelfitem">
+	<DataAnnotationsValidator></DataAnnotationsValidator>
+	<CustomInputSelect class="form-control" @bind-Value="newShelfitem.ShopitemID">
+		@foreach (var item in Shopitems)
+		{
+			<option value="@item.ID">@item.Name</option>
+		}
+	</CustomInputSelect>
+	<div class="form-group">
+		<label for="Shelfcount">Shelf count:</label>
+		<InputNumber @bind-Value="newShelfitem.Shelfcount" class="form-control"></InputNumber>
+	</div>
+	<div class="form-group">
+		<label for="Shelfprice">Shelf price:</label>
+		<InputNumber @bind-Value="newShelfitem.Shelfprice" class="form-control"></InputNumber>
+	</div>
+	<ValidationSummary></ValidationSummary>
+</EditForm>
 
 @code {
 
 	private List<Shopitem> Shopitems { get; set; }
 
-	[Parameter]
-	public Shelfitem newShelfitem { get; set; }
+	private Shelfitem _newShelfitem;
 
+	[Parameter]
+	public Shelfitem newShelfitem {
+		get => _newShelfitem;
+		set
+		{
+			if (_newShelfitem == value)
+			{
+				return;
+			}
+			_newShelfitem = value;
+			newShelfitemChanged.InvokeAsync(value);
+		}
+	}
 
 	[Parameter]
 	public EventCallback<Shelfitem> newShelfitemChanged { get; set; }
 
-	[Parameter]
-	public double yourMoney { get; set; }
-
-	[Parameter]
-	public EventCallback<double> yourMoneyChanged { get; set; }
-
 	public void addProduct()
 	{
-		
-		double newMoneySum = yourMoney - Shopitems.First(x => x.ID == newShelfitem.ShopitemID).Price * newShelfitem.Shelfcount;
-		if (newMoneySum >= 0)
-		{
-			Shopservice.NewShelfItem(newShelfitem);
-			yourMoney = newMoneySum;
-		}
-		else
-		{
-			//error
-		}
-
+		Shopservice.NewShelfItem(newShelfitem);
 	}
 	protected override Task OnInitializedAsync()
 	{
 		Shopitems = Shopservice.Shopitems;
+		newShelfitem = new Shelfitem();
 		return base.OnInitializedAsync();
 	}
 }

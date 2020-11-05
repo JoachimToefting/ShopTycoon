@@ -1,16 +1,27 @@
 ﻿@page "/counter"
+@inject ProtectedLocalStorage ProtectedLocalStorage
 
 <h1>Counter</h1>
 
 <p>Current count: @currentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button @onclick="button">shit</button>
 
 @code {
-    private int currentCount = 0;
+	private int currentCount = 0;
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+	private void IncrementCount()
+	{
+		currentCount++;
+	}
+
+	private async Task button()
+	{
+		var qwe = await ProtectedLocalStorage.GetAsync<string>("User");
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		var qwe = await ProtectedLocalStorage.GetAsync<string>("User");
+	}
 }

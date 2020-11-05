@@ -3,24 +3,33 @@
 
 <h3>NewGame</h3>
 
-<label>Whats your name:</label>
+<EditForm Model="@User" OnValidSubmit="@Save">
+	<DataAnnotationsValidator></DataAnnotationsValidator>
+	<ValidationSummary></ValidationSummary>
 
-<input @bind="Name" />
-<button class="btn btn-primary" @onclick="Save">New Game</button>
+	<label for="Name">Whats your name:</label>
+	<InputText @bind-Value="User.Name"></InputText>
+
+	<input type="submit" class="btn btn-primary" value="New Game" />
+</EditForm>
 
 @code {
 	[Parameter]
-	public string Name { get; set; }
+	public User User { get; set; }
 
 	[Parameter]
-	public EventCallback<string> NameChanged { get; set; }
+	public EventCallback<User> UserChanged { get; set; }
 
 	public async Task Save()
 	{
-		await ProtectedLocalStorage.SetAsync("Name", Name);
+		await ProtectedLocalStorage.SetAsync("User", User.Name);
 		await ProtectedLocalStorage.SetAsync("GameData", new GameData
 		{
 			YourMoney = 300
 		});
+	}
+	protected override void OnInitialized()
+	{
+		User = new User();
 	}
 }

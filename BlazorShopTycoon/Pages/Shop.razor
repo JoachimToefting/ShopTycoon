@@ -6,19 +6,24 @@
 
 <h4>Welcome to your shop</h4>
 
-@if (string.IsNullOrEmpty(Name))
+@if (User?.Name == null)
 {
-	<BlazorShopTycoon.Components.NewGame @bind-Name="Name"></BlazorShopTycoon.Components.NewGame>
+	@*<BlazorShopTycoon.Components.NewGame @bind-User="User"></BlazorShopTycoon.Components.NewGame>*@
+
+	<label for="Name">Whats your name:</label>
+	<input @bind="User.Name" />
+	<button @onclick="Save" class="btn btn-primary">New Game</button>
 	<br />
 	<button class="btn btn-primary" @onclick="Load">Load last game</button>
 }
 else
 {
+	<h5>@User?.Name</h5>
 	<BlazorShopTycoon.Components.Game @bind-YourMoney="YourMoney" @bind-Shelfitems="Shelfitems"></BlazorShopTycoon.Components.Game>
 }
 
 @code {
-	public string Name { get; set; }
+	public User User { get; set; }
 
 	public double YourMoney { get; set; }
 
@@ -26,10 +31,27 @@ else
 
 	private async Task Load()
 	{
-		string NameLocalStorage = await ProtectedLocalStorage.GetAsync<string>("Name");
-		Name = NameLocalStorage;
+		var NameLocalStorage = await ProtectedLocalStorage.GetAsync<User>("User");
+
+		User = NameLocalStorage;
 		GameData gameDataLocalstorage = await ProtectedLocalStorage.GetAsync<GameData>("GameData");
-		YourMoney = gameDataLocalstorage.YourMoney;
-		Shelfitems = gameDataLocalstorage.Shelfitems;
+		if (gameDataLocalstorage != null)
+		{
+			YourMoney = gameDataLocalstorage.YourMoney;
+			Shelfitems = gameDataLocalstorage.Shelfitems;
+		}
 	}
+	public async Task Save()
+	{
+		await ProtectedLocalStorage.SetAsync("User", User);
+		await ProtectedLocalStorage.SetAsync("GameData", new GameData
+		{
+			YourMoney = 300
+		});
+	}
+	protected override void OnInitialized()
+	{
+		User = new User();
+	}
+
 }

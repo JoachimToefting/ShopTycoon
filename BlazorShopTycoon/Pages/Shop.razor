@@ -1,12 +1,12 @@
 ﻿@page "/shop"
 
 @inject ProtectedLocalStorage ProtectedLocalStorage
-
+@inject ShopStoreService ShopStoreService
 <h3>Shop</h3>
 
 <h4>Welcome to your shop</h4>
 
-@if (User?.Name == null)
+@if (User == null || User?.Name == null || GameData == null)
 {
 	@*<BlazorShopTycoon.Components.NewGame @bind-User="User"></BlazorShopTycoon.Components.NewGame>*@
 
@@ -19,35 +19,53 @@
 else
 {
 	<h5>@User?.Name</h5>
-	<BlazorShopTycoon.Components.Game @bind-YourMoney="YourMoney" @bind-Shelfitems="Shelfitems"></BlazorShopTycoon.Components.Game>
+	<p>@GameData.Day</p>
+	<BlazorShopTycoon.Components.Game @bind-YourMoney="GameData.YourMoney" @bind-Shelfitems="GameData.Shelfitems" @bind-Day="GameData.Day"></BlazorShopTycoon.Components.Game>
+	<button class="btn btn-danger" @onclick="Save">Save Game</button>
 }
+
 
 @code {
 	public User User { get; set; }
 
-	public double YourMoney { get; set; }
+	//public double YourMoney { get; set; } = 300;
 
-	public List<Shelfitem> Shelfitems { get; set; }
+	//public List<Shelfitem> Shelfitems { get; set; }
+
+	public GameData GameData { get; set; }
 
 	private async Task Load()
 	{
 		var NameLocalStorage = await ProtectedLocalStorage.GetAsync<User>("User");
+		if (NameLocalStorage == null)
+		{
+			//No save found
+			return;
+		}
 
 		User = NameLocalStorage;
 		GameData gameDataLocalstorage = await ProtectedLocalStorage.GetAsync<GameData>("GameData");
 		if (gameDataLocalstorage != null)
 		{
-			YourMoney = gameDataLocalstorage.YourMoney;
-			Shelfitems = gameDataLocalstorage.Shelfitems;
+			//	YourMoney = gameDataLocalstorage.YourMoney;
+			//	Shelfitems = gameDataLocalstorage.Shelfitems;
+			GameData = gameDataLocalstorage;
+			ShopStoreService.Shelfitems = GameData.Shelfitems;
 		}
 	}
 	public async Task Save()
 	{
 		await ProtectedLocalStorage.SetAsync("User", User);
-		await ProtectedLocalStorage.SetAsync("GameData", new GameData
+		if (GameData == null)
 		{
-			YourMoney = 300
-		});
+			ShopStoreService.Shelfitems = new List<Shelfitem>();
+			GameData = new GameData
+			{
+				YourMoney = 300,
+				Shelfitems = new List<Shelfitem>()
+			};
+		}
+		await ProtectedLocalStorage.SetAsync("GameData", GameData);
 	}
 	protected override void OnInitialized()
 	{

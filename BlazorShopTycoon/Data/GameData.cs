@@ -7,7 +7,8 @@ namespace BlazorShopTycoon.Data
 {
 	public class GameData
 	{
-		public int YourMoney { get; set; }
+		public double YourMoney { get; set; }
 		public List<Shelfitem> Shelfitems { get; set; }
+		public int Day { get; set; }
 	}
 }
